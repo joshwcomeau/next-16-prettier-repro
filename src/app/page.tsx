@@ -5,9 +5,10 @@ import React from 'react';
 export default function Home() {
   React.useEffect(() => {
     Promise.all([
-      import('prettier'),
+      import('prettier/standalone'),
       import('prettier/plugins/babel'),
-    ]).then(async ([prettier, babelPlugin]) => {
+      import('prettier/plugins/estree'),
+    ]).then(async ([prettier, babelPlugin, estreePlugin]) => {
       const code = `
         import React from "react";
         export default function Home() {
@@ -19,7 +20,8 @@ export default function Home() {
       `;
       const formatted = await prettier.format(code, {
         parser: 'babel',
-        plugins: [babelPlugin],
+        // @ts-expect-error - prettier is not typed
+        plugins: [babelPlugin, estreePlugin],
       });
       console.log(formatted);
     });

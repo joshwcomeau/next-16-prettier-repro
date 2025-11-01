@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a minimal reproduction of an issue I’m encountering in my Next 16 project, when dynamically importing Prettier.
 
-## Getting Started
+Prettier is not typically bundled and included in the app, but in this project, we’re loading it in-browser (the full use case is to format user-submitted code, but this repro is simplified to format a prewritten string).
 
-First, run the development server:
+When dynamically importing the `babel` Prettier plugin, we get the following error:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+Uncaught (in promise) ReferenceError: Ia is not defined
+    at module evaluation (0878ea95be1c2b7c.js:15:3705)
+    at L (turbopack-617304004e1657dc.js:3:939)
+    at N (turbopack-617304004e1657dc.js:3:480)
+    at n.h [as i] (turbopack-617304004e1657dc.js:1:2204)
+    at 94c7ef302e458762.js:9:335
+    at async Promise.all (:3000/index 1)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Weirdly, this issue only occurs in production.** Everything works fine when running `next dev`. The issue was introduced with Next 16.0.0, and occurs using both Turbopack and Webpack.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Reproduction instructions:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+In the terminal:
 
-## Learn More
+```bash
+$ npm run build && npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open `localhost:3000`, open the developer console, and note the error in the console.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+If you run a dev server instead (`next dev`), the console doesn't display the error, and instead displays the reformatted code, as expected.
