@@ -2,29 +2,41 @@
 
 import React from 'react';
 
+import prettier from 'prettier/standalone';
+import babelPlugin from 'prettier/plugins/babel';
+import estreePlugin from 'prettier/plugins/estree';
+
+const testCode = `
+import React from "react";
+
+export default function Home() {
+  return <p>
+    Hello
+        World
+      </p>;
+}
+`;
+
 export default function Home() {
   React.useEffect(() => {
-    Promise.all([
-      import('prettier/standalone'),
-      import('prettier/plugins/babel'),
-      import('prettier/plugins/estree'),
-    ]).then(async ([prettier, babelPlugin, estreePlugin]) => {
-      const code = `
-        import React from "react";
-        export default function Home() {
-          return <p>
-            Hello
-                  World
-                  </p>;
-        }
-      `;
-      const formatted = await prettier.format(code, {
+    console.log('Formatting code...');
+    prettier
+      .format(testCode, {
         parser: 'babel',
-        // @ts-expect-error - prettier is not typed
         plugins: [babelPlugin, estreePlugin],
+      })
+      .then((formatted) => {
+        console.log(formatted);
+      })
+      .catch((error) => {
+        console.error(error);
       });
-      console.log(formatted);
-    });
   });
-  return <p>Hello World</p>;
+
+  return (
+    <p>
+      Check the developer console to view the error (must be running a
+      production build).
+    </p>
+  );
 }
